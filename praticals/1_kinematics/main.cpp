@@ -20,7 +20,7 @@ vec3 target = vec3(6.0f, 4.0f, 0);
 void MoveTarget() {
   target = glm::ballRand((static_cast<float>(numLinks) * linkLength) * 0.6f);
   target.y = abs(target.y);
-  // target.x = abs(target.x);
+   target.x = abs(target.x);
   cout << "boop" << endl;
 }
 
@@ -59,8 +59,8 @@ void UpdateIK() {
   if (distance < 0.5f) {
     MoveTarget();
   }
-  // ik_1dof_Update(target, links, linkLength);
-  ik_3dof_Update(target, links, linkLength);
+  ik_1dof_Update(target, links, linkLength);
+  //ik_3dof_Update(target, links, linkLength);
 }
 
 void RenderIK() {
