@@ -15,6 +15,10 @@ using namespace glm;
 int numLinks = 5;
 float linkLength = 2.0f; // Length of each link
 std::vector<Link> links;
+std::vector<Link> slerpLinks;
+std::array<std::vector<Link>, 2> pastLink;
+bool found = false;
+int counter = 0;
 vec3 target = vec3(6.0f, 4.0f, 0);
 
 void MoveTarget() {
@@ -47,6 +51,8 @@ bool load_content() {
     int ay = (i + 1) % 3 == 0;
     int az = (i + 2) % 3 == 0;
     links.push_back(Link(vec3(ax, ay, az), 0.0 + (float)i * 0.0f));
+	slerpLinks.push_back(Link(vec3(ax, ay, az), 0.0 + (float)i * 0.0f));
+	pastLink[0].push_back(Link(vec3(ax, ay, az), 0.0 + (float)i * 0.0f));
     cout << vec3(ax, ay, az) << endl;
   }
   UpdateHierarchy();
@@ -57,21 +63,46 @@ void UpdateIK() {
   UpdateHierarchy();
   const float distance = length(vec3(links[links.size() - 1].m_end[3]) - target);
   if (distance < 0.5f) {
-    MoveTarget();
+	  counter = 1 - counter;
+	  pastLink[counter] = links;
+	  found = true;
   }
-  ik_1dof_Update(target, links, linkLength);
+  else
+  {
+	  ik_1dof_Update(target, links, linkLength);
+  }
+
+  if (found == true)
+  {
+	  MoveTarget();
+  }
   //ik_3dof_Update(target, links, linkLength);
 }
 
 void RenderIK() {
   phys::DrawSphere(target, 0.2f, RED);
-  for (int i = 0; i < (int)links.size(); ++i) {
-    vec3 base = links[i].m_base[3];
-    vec3 end = links[i].m_end[3];
-    phys::DrawCube(links[i].m_base * glm::scale(mat4(1.0f), vec3(0.5f)), GREEN);
-    phys::DrawCube(links[i].m_end * glm::scale(mat4(1.0f), vec3(0.5f)), ORANGE);
-    phys::DrawLine(base, end);
-    phys::DrawPlane(base, links[i].m_worldaxis, vec3(0.01f));
+  if (found == true)
+  {
+	  for (int i = 0; i < (int)links.size(); ++i) {
+		  vec3 base = links[i].m_base[3];
+		  vec3 end = links[i].m_end[3];
+		  phys::DrawCube(links[i].m_base * glm::scale(mat4(1.0f), vec3(0.5f)), GREEN);
+		  phys::DrawCube(links[i].m_end * glm::scale(mat4(1.0f), vec3(0.5f)), ORANGE);
+		  phys::DrawLine(base, end);
+		  phys::DrawPlane(base, links[i].m_worldaxis, vec3(0.01f));
+	  }
+	  found = false;
+  }
+  else
+  {
+	  for (int i = 0; i < (int)links.size(); ++i) {
+		  vec3 base = pastLink[counter][i].m_base[3];
+		  vec3 end = pastLink[counter][i].m_end[3];
+		  phys::DrawCube(pastLink[counter][i].m_base * glm::scale(mat4(1.0f), vec3(0.5f)), GREEN);
+		  phys::DrawCube(pastLink[counter][i].m_end * glm::scale(mat4(1.0f), vec3(0.5f)), ORANGE);
+		  phys::DrawLine(base, end);
+		  phys::DrawPlane(base, pastLink[counter][i].m_worldaxis, vec3(0.01f));
+	  }
   }
 }
 

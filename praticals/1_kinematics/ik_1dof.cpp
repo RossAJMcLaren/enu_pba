@@ -51,7 +51,7 @@ void ik_1dof_Update(const vec3 &const target, std::vector<Link> &const links, co
    for (size_t i = links.size(); i >= 1; --i) {
   //for (size_t i = 0; i < links.size() - 1; ++i) {
     UpdateHierarchy();
-    Reach(i-11, target, links);
+    Reach(i-1, target, links);
     const float distance = length(vec3(links[links.size() - 1].m_end[3]) - target);
     if (distance < 0.5f) {
       return;
